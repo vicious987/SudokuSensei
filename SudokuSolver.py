@@ -33,8 +33,11 @@ t = t1
 
 BG_COLOR = WHITE = (255, 255, 255)
 FOCUS_COLOR = RED = (255,0,0)
+GREEN = (0,255,0)
 GAME_DIGIT = BLACK = (0,0,0)
 PLAYER_DIGIT = GRAY = (150,150,150)
+
+DELAY = 10
 
 class SudokuGrid():
 
@@ -56,6 +59,33 @@ class SudokuGrid():
         for row in self.squares:
             for sqr in row:
                 sqr.draw()
+
+    def update_matrix(self):
+         self.matrix = [[self.squares[i][j].value for j in range(9)] for i in range(9)]
+    
+    def setset(self, r, c, d): #rename
+        self.squares[r][c].set(d)
+        self.matrix[r][c] = d
+
+    def solve_gui(self):
+        r, c = SudokuTools.find_blank(self.matrix)
+        if r is None:
+            return True
+
+        for d in SudokuTools.DIGITS: 
+            if d in SudokuTools.get_viable_digits(self.matrix, r, c):
+                self.setset(r, c, d)
+                self.squares[r][c].solver_draw(backtracked = False)
+                pygame.display.update()
+                pygame.time.delay(DELAY)
+                if self.solve_gui():
+                    return True
+
+                self.setset(r, c, 0)
+                self.squares[r][c].solver_draw(backtracked = True)
+                pygame.display.update()
+                pygame.time.delay(DELAY)
+        return False
 
     def mousepos_to_gridpos(self, mouse_pos):
         mouse_y, mouse_x = mouse_pos
@@ -130,6 +160,15 @@ class Box():
         if self.focus:
             pygame.draw.rect(self.surface, FOCUS_COLOR, self.rect, 3)
 
+    def solver_draw(self, backtracked):
+        pygame.draw.rect(self.surface, WHITE, self.rect, 0)
+        self.draw()
+        color = RED if backtracked else GREEN 
+        pygame.draw.rect(self.surface, color, self.rect, 3)
+
+    def set(self, v):
+        self.value = v
+
     def set_value(self, v) -> bool:
         if not self.const:
             self.value = v
@@ -167,5 +206,7 @@ while is_running:
                     print("yay! :)")
                 else:
                     print("nay! :(")
+            if input == "space":
+                g.solve_gui()
 
     pygame.display.update()
