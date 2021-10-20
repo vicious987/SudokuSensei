@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import SudokuToolset as SudokuTools
 import pygame
+from collections import Counter
 
 t1 = [
 #    0 1 2  3 4 5  6 7 8 
@@ -30,6 +31,14 @@ board = [
     ]
 """
 t = t1 
+#TODO
+#input matrix from user
+#                       >-- OR autogenerate
+#input matrix from file
+
+#victory/losing screen
+#interupt gui_solver
+#make config files
 
 BG_COLOR = WHITE = (255, 255, 255)
 FOCUS_COLOR = RED = (255,0,0)
@@ -37,7 +46,7 @@ GREEN = (0,255,0)
 GAME_DIGIT = BLACK = (0,0,0)
 PLAYER_DIGIT = GRAY = (150,150,150)
 
-DELAY = 10
+DELAY = 0
 
 class SudokuGrid():
 
@@ -60,28 +69,38 @@ class SudokuGrid():
             for sqr in row:
                 sqr.draw()
 
-    def update_matrix(self):
-         self.matrix = [[self.squares[i][j].value for j in range(9)] for i in range(9)]
+    def deselect(self):
+        if self.selected_sqr is None:
+            return
+        self.selected_sqr.focus = False
+        self.selected_sqr = None
     
-    def setset(self, r, c, d): #rename
+    def set_both(self, r, c, d):
         self.squares[r][c].set(d)
         self.matrix[r][c] = d
 
-    def solve_gui(self):
+    def reset_board(self):
+        for row in self.squares:
+            for s in row:
+                if not s.const:
+                    self.set_both(s.row, s.col, 0)
+
+
+    def solve_and_draw(self):
         r, c = SudokuTools.find_blank(self.matrix)
         if r is None:
             return True
 
         for d in SudokuTools.DIGITS: 
             if d in SudokuTools.get_viable_digits(self.matrix, r, c):
-                self.setset(r, c, d)
+                self.set_both(r, c, d)
                 self.squares[r][c].solver_draw(backtracked = False)
                 pygame.display.update()
                 pygame.time.delay(DELAY)
-                if self.solve_gui():
+                if self.solve_and_draw():
                     return True
 
-                self.setset(r, c, 0)
+                self.set_both(r, c, 0)
                 self.squares[r][c].solver_draw(backtracked = True)
                 pygame.display.update()
                 pygame.time.delay(DELAY)
@@ -95,9 +114,13 @@ class SudokuGrid():
             return grid_x, grid_y
         return None, None 
 
+
     def select_sqr(self, mouse_pos) -> bool:
         x, y = self.mousepos_to_gridpos(mouse_pos)
         if x is None:
+            return False
+
+        if self.squares[x][y].const:
             return False
 
         if self.selected_sqr is not None:
@@ -110,10 +133,9 @@ class SudokuGrid():
     def fill_selected_sqr(self, digit:str) -> bool:
         if self.selected_sqr is None:
             return False
-        success = self.selected_sqr.enter_value(int(digit))
-        if success:
-            self.matrix[self.selected_sqr.row][self.selected_sqr.col] = int(digit)
-        return success
+        r, c = self.selected_sqr.row, self.selected_sqr.col
+        self.set_both(r, c, int(digit))
+        return True
 
     def is_victorious(self):
         if not self.is_finished():
@@ -123,9 +145,6 @@ class SudokuGrid():
         valid_cols = all([SudokuTools.is_valid(SudokuTools.get_col(self.matrix, i)) for i in range(9)])
         valid_boxes = all([SudokuTools.is_valid(SudokuTools.get_box(self.matrix, i, j)) for i in range(3) for j in range(3)])
         return valid_rows and valid_cols and valid_boxes 
-
-
-
 
     def is_finished(self): #replace with "to fill tracker"
         for i in range(9):
@@ -144,9 +163,9 @@ class Box():
         self.surface = surf
         self.focus = focus
 
-        self.size = surf.get_width() / 9
+        self.size = surf.get_width() / 9 
         self.x = col * self.size 
-        self.y = row * self.size 
+        self.y = row * self.size
         self.rect = pygame.Rect(self.x, self.y, self.size, self.size)
 
     
@@ -168,18 +187,6 @@ class Box():
 
     def set(self, v):
         self.value = v
-
-    def set_value(self, v) -> bool:
-        if not self.const:
-            self.value = v
-            return True
-        return False
-
-    def enter_value(self, v) -> bool:
-        if self.focus:
-            is_set = self.set_value(v)
-            return is_set
-        return False
 
 pygame.init()
 window = pygame.display.set_mode(size=(800, 800))
@@ -207,6 +214,10 @@ while is_running:
                 else:
                     print("nay! :(")
             if input == "space":
-                g.solve_gui()
+                g.deselect()
+                g.reset_board()
+                g.solve_and_draw()
+            if input == "r":
+                g.reset_board()
 
     pygame.display.update()

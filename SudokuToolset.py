@@ -6,7 +6,7 @@ def get_row(board, row):
     return set(board[row])
 
 def is_valid(row):
-    Counter(row) == Counter(DIGITS)
+    return Counter(row) == Counter(DIGITS)
 
 def get_col(board, col):
     return set([board[row][col] for row in range(9)])
