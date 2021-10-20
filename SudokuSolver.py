@@ -31,8 +31,10 @@ board = [
 """
 t = t1 
 
-BLACK = (0,0,0)
-WHITE = (255, 255, 255)
+BG_COLOR = WHITE = (255, 255, 255)
+FOCUS_COLOR = RED = (255,0,0)
+GAME_DIGIT = BLACK = (0,0,0)
+PLAYER_DIGIT = GRAY = (150,150,150)
 
 class SudokuGrid():
 
@@ -40,28 +42,53 @@ class SudokuGrid():
         self.surface = surf
         self.width, self.height = surf.get_width() , surf.get_height()
         self.squares = [[Box(self.surface, i, j, t[i][j]) for j in range(9)] for i in range(9)]
-
-    #def update(self):
-    #    self.model = [[self.squares[i][j].value for j in range(9)] for i in range(9)]
+        self.sqr_size = self.width / 9
+        self.selected_sqr = None
 
     def draw(self):
-        sqr_size = self.width / 9
-        for i in range(9+1):
-            thickness = 4 if (i % 3 == 0 and i != 0) else 1
-            pygame.draw.line(self.surface, BLACK, (0, i * sqr_size), (self.width, i * sqr_size), thickness)
-            pygame.draw.line(self.surface, BLACK, (i * sqr_size, 0), (i * sqr_size, self.height), thickness)
+        for i in range(1,10):
+            thickness = 1 if i % 3 != 0 else 4
+            j = i * self.sqr_size
+            pygame.draw.line(self.surface, BLACK, (0, j), (self.width, j), thickness)
+            pygame.draw.line(self.surface, BLACK, (j, 0), (j, self.height), thickness)
 
         for row in self.squares:
             for sqr in row:
                 sqr.draw()
 
+    def mousepos_to_gridpos(self, mouse_pos):
+        mouse_y, mouse_x = mouse_pos
+        if mouse_x < self.width and mouse_y < self.height:
+            grid_x = int(mouse_x // self.sqr_size)
+            grid_y = int(mouse_y // self.sqr_size)
+            return grid_x, grid_y
+        return None, None 
+
+    def select_sqr(self, mouse_pos) -> bool:
+        x, y = self.mousepos_to_gridpos(mouse_pos)
+        if x is None:
+            return False
+
+        if self.selected_sqr is not None:
+            self.selected_sqr.focus = False
+        self.selected_sqr = self.squares[x][y]
+        self.selected_sqr.focus = True
+        return True
+
+    def fill_sqr(self, digit:str) -> bool:
+        if self.selected_sqr is None:
+            return False
+        return self.selected_sqr.enter_value(int(digit))
+
+
 class Box():
-    def __init__(self, surf, row, col, val, const=True):
+    def __init__(self, surf, row, col, val, focus = False):
         self.row = row
         self.col = col 
         self.value = val
-        self.const = const
+        self.const = val != 0 
         self.surface = surf
+        self.focus = focus
 
         self.size = surf.get_width() / 9
         self.x = col * self.size 
@@ -71,12 +98,25 @@ class Box():
     
     def draw(self):
         font = pygame.font.SysFont(pygame.font.get_default_font(), 40)
-        text = font.render(str(self.value), 1, (0,0,0))
+        text_color = GAME_DIGIT if self.const else PLAYER_DIGIT
+        text = font.render(str(self.value), 1, text_color)
         dest = (self.x + (self.size/2 - text.get_width()/2), self.y + (self.size/2 - text.get_height()/2))
         self.surface.blit(text, dest)
 
-    def set_value(self, v):
-        self.value = v
+        if self.focus:
+            pygame.draw.rect(self.surface, FOCUS_COLOR, self.rect, 3)
+
+    def set_value(self, v) -> bool:
+        if not self.const:
+            self.value = v
+            return True
+        return False
+
+    def enter_value(self, v) -> bool:
+        if self.focus:
+            is_set = self.set_value(v)
+            return is_set
+        return False
 
 pygame.init()
 window = pygame.display.set_mode(size=(800, 800))
@@ -85,9 +125,19 @@ g = SudokuGrid(window)
 is_running = True
 
 while is_running:
-    window.fill(WHITE)
+    window.fill(BG_COLOR)
     g.draw()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             is_running = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            print(pygame.mouse.get_pos())
+            g.select_sqr(pygame.mouse.get_pos())
+        if event.type == pygame.KEYDOWN:
+            #print(event.key, event.mod, event.unicode, event.scancode)
+            #print(pygame.key.name(event.key))
+            input = pygame.key.name(event.key)
+            if input in "0123456789":
+                g.fill_sqr(input)
+
     pygame.display.update()
