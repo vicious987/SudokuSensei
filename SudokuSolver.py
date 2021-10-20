@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import SudokuToolset
+import SudokuToolset as SudokuTools
 import pygame
 
 t1 = [
@@ -38,10 +38,11 @@ PLAYER_DIGIT = GRAY = (150,150,150)
 
 class SudokuGrid():
 
-    def __init__(self, surf):
+    def __init__(self, surf, matrix):
         self.surface = surf
+        self.matrix = matrix
         self.width, self.height = surf.get_width() , surf.get_height()
-        self.squares = [[Box(self.surface, i, j, t[i][j]) for j in range(9)] for i in range(9)]
+        self.squares = [[Box(self.surface, i, j, matrix[i][j]) for j in range(9)] for i in range(9)]
         self.sqr_size = self.width / 9
         self.selected_sqr = None
 
@@ -75,10 +76,33 @@ class SudokuGrid():
         self.selected_sqr.focus = True
         return True
 
-    def fill_sqr(self, digit:str) -> bool:
+
+    def fill_selected_sqr(self, digit:str) -> bool:
         if self.selected_sqr is None:
             return False
-        return self.selected_sqr.enter_value(int(digit))
+        success = self.selected_sqr.enter_value(int(digit))
+        if success:
+            self.matrix[self.selected_sqr.row][self.selected_sqr.col] = int(digit)
+        return success
+
+    def is_victorious(self):
+        if not self.is_finished():
+            return False
+        #check if everything is valid
+        valid_rows = all([SudokuTools.is_valid(SudokuTools.get_row(self.matrix, i)) for i in range(9)])
+        valid_cols = all([SudokuTools.is_valid(SudokuTools.get_col(self.matrix, i)) for i in range(9)])
+        valid_boxes = all([SudokuTools.is_valid(SudokuTools.get_box(self.matrix, i, j)) for i in range(3) for j in range(3)])
+        return valid_rows and valid_cols and valid_boxes 
+
+
+
+
+    def is_finished(self): #replace with "to fill tracker"
+        for i in range(9):
+            for j in range(9):
+                if self.squares[i][j].value == 0:
+                    return False
+        return True
 
 
 class Box():
@@ -121,7 +145,7 @@ class Box():
 pygame.init()
 window = pygame.display.set_mode(size=(800, 800))
 pygame.display.set_caption("SudokuSensei")
-g = SudokuGrid(window)
+g = SudokuGrid(window, t)
 is_running = True
 
 while is_running:
@@ -130,14 +154,18 @@ while is_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             is_running = False
+
         if event.type == pygame.MOUSEBUTTONDOWN:
-            print(pygame.mouse.get_pos())
             g.select_sqr(pygame.mouse.get_pos())
+
         if event.type == pygame.KEYDOWN:
-            #print(event.key, event.mod, event.unicode, event.scancode)
-            #print(pygame.key.name(event.key))
             input = pygame.key.name(event.key)
             if input in "0123456789":
-                g.fill_sqr(input)
+                g.fill_selected_sqr(input)
+            if input == "return":
+                if g.is_victorious():
+                    print("yay! :)")
+                else:
+                    print("nay! :(")
 
     pygame.display.update()

@@ -1,8 +1,12 @@
 BLANK = 0
 DIGITS = set(range(1,10))
+from collections import Counter
 
 def get_row(board, row):
     return set(board[row])
+
+def is_valid(row):
+    Counter(row) == Counter(DIGITS)
 
 def get_col(board, col):
     return set([board[row][col] for row in range(9)])
