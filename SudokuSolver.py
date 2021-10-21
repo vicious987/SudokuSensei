@@ -52,7 +52,7 @@ class SudokuGrid():
 
     def draw(self):
         for i in range(1,10):
-            thickness = 1 if i % 3 != 0 else 4
+            thickness = cfg.LINE_SIZE_NORMAL if i % 3 != 0 else cfg.LINE_SIZE_THICK
             j = i * self.sqr_size
             pygame.draw.line(self.surface, cfg.LINE_COLOR, (0, j), (self.width, j), thickness)
             pygame.draw.line(self.surface, cfg.LINE_COLOR, (j, 0), (j, self.height), thickness)

@@ -17,7 +17,11 @@ BG_COLOR = WHITE            # board background color
 HIGHLIGHT_COLOR = BLUE      # color of square chosen by player
 DIGIT_CONST_COLOR = BLACK   # non-changeable digits
 DIGIT_MUTABLE_COLOR = GRAY  # digits changeable by player  
-LINE_COLOR = BLACK          # Sudoku board seperator
+
+# Sudoku board seperator
+LINE_COLOR = BLACK
+LINE_SIZE_NORMAL = 1
+LINE_SIZE_THICK = 4
 
 #solver configs
 SOLVER_INP_COLOR = GREEN            # highlight color of filled squares
