@@ -3,42 +3,10 @@ import SudokuToolset as SudokuTools
 import config as cfg
 import pygame
 
-t1 = [
-#    0 1 2  3 4 5  6 7 8 
-    [0,0,3, 4,7,5, 1,2,9], #0
-    [1,0,0, 3,0,2, 0,0,0], #1
-    [0,2,0, 1,9,0, 0,8,0], #2
-
-    [0,0,0, 6,0,7, 9,0,0], #3
-    [0,1,8, 2,0,9, 6,7,0], #4
-    [0,9,7, 5,1,8, 0,0,0], #5
-
-    [7,0,6, 9,0,0, 0,0,0], #6
-    [0,0,0, 7,2,1, 0,0,0], #7
-    [2,0,1, 8,0,4, 7,9,0], #8
-]
-"""
-board = [
-        [7, 8, 0, 4, 0, 0, 1, 2, 0],
-        [6, 0, 0, 0, 7, 5, 0, 0, 9],
-        [0, 0, 0, 6, 0, 1, 0, 7, 8],
-        [0, 0, 7, 0, 4, 0, 2, 6, 0],
-        [0, 0, 1, 0, 5, 0, 9, 3, 0],
-        [9, 0, 4, 0, 6, 0, 0, 0, 5],
-        [0, 7, 0, 3, 0, 0, 0, 1, 2],
-        [1, 2, 0, 0, 0, 7, 4, 0, 0],
-        [0, 4, 9, 2, 0, 6, 0, 0, 7]
-    ]
-"""
-t = t1 
 #TODO
-#input matrix from user
-#                       >-- OR autogenerate
-#input matrix from file
-
+#generate sudoku boards 
 #victory/losing screen
 #interupt gui_solver
-#make config files
 
 class SudokuGrid():
 
@@ -182,16 +150,13 @@ class Square():
 pygame.init()
 window = pygame.display.set_mode(cfg.WINDOW_SIZE)
 pygame.display.set_caption(cfg.WINDOW_NAME)
-g = SudokuGrid(window, t)
+g = SudokuGrid(window, SudokuTools.generate_board())
 is_running = True
 
 while is_running:
     window.fill(cfg.BG_COLOR)
     g.draw()
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            is_running = False
-
         if event.type == pygame.MOUSEBUTTONDOWN:
             g.select_sqr(pygame.mouse.get_pos())
 
@@ -210,5 +175,8 @@ while is_running:
                 g.solve_and_draw()
             if input == cfg.KEY_RESTART_BOARD:
                 g.reset_board()
+
+        if event.type == pygame.QUIT:
+            is_running = False
 
     pygame.display.update()
