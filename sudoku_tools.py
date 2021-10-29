@@ -44,7 +44,7 @@ def get_row(board, row: int) -> set:
 
 def get_col(board, col: int) -> set:
     """a helper function to select a row from sudoku board"""
-    return {[board[row][col] for row in range(9)]}
+    return set([board[row][col] for row in range(9)])
 
 def get_box(board, row: int, col: int) -> set:
     """given cordinates, returns set of digits from sudoku 3x3 box"""
