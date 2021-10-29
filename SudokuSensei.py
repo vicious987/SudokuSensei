@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import config as cfg
 import pygame
-import SudokuTools 
+import sudoku_tools 
 
 #TODO
 #victory/losing screen
@@ -46,12 +46,12 @@ class SudokuGrid():
 
 
     def solve_and_draw(self):
-        r, c = SudokuTools.find_blank(self.matrix)
+        r, c = sudoku_tools.find_blank(self.matrix)
         if r is None:
             return True
 
-        for d in SudokuTools.DIGITS: 
-            if d in SudokuTools.get_viable_digits(self.matrix, r, c):
+        for d in sudoku_tools.DIGITS: 
+            if d in sudoku_tools.get_viable_digits(self.matrix, r, c):
                 self.set_both(r, c, d)
                 self.squares[r][c].solver_draw(backtracked = False)
                 pygame.display.update()
@@ -99,9 +99,9 @@ class SudokuGrid():
         if not self.is_finished():
             return False
 
-        valid_rows = all([SudokuTools.is_valid(SudokuTools.get_row(self.matrix, i)) for i in range(9)])
-        valid_cols = all([SudokuTools.is_valid(SudokuTools.get_col(self.matrix, i)) for i in range(9)])
-        valid_boxes = all([SudokuTools.is_valid(SudokuTools.get_box(self.matrix, i, j)) for i in range(3) for j in range(3)])
+        valid_rows = all([sudoku_tools.is_valid(sudoku_tools.get_row(self.matrix, i)) for i in range(9)])
+        valid_cols = all([sudoku_tools.is_valid(sudoku_tools.get_col(self.matrix, i)) for i in range(9)])
+        valid_boxes = all([sudoku_tools.is_valid(sudoku_tools.get_box(self.matrix, i, j)) for i in range(3) for j in range(3)])
         return valid_rows and valid_cols and valid_boxes 
 
     def is_finished(self): #replace with "to fill tracker"
@@ -149,7 +149,7 @@ class Square():
 pygame.init()
 window = pygame.display.set_mode(cfg.WINDOW_SIZE)
 pygame.display.set_caption(cfg.WINDOW_NAME)
-g = SudokuGrid(window, SudokuTools.generate_board())
+g = SudokuGrid(window, sudoku_tools.generate_board())
 is_running = True
 
 while is_running:
