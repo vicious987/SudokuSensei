@@ -27,7 +27,7 @@ LINE_SIZE_THICK = 4
 # solver configs
 SOLVER_INP_COLOR = GREEN            # highlight color of filled squares
 SOLVER_INP_BACKTRACK_COLOR = RED    # highlight color of backtracked squares
-SOLVER_DELAY = 0            #defines delay in ms between solver inputs
+SOLVER_DELAY = 50            #defines delay in ms between solver inputs
 
 # key bindings
 KEY_RUN_SOLVER = "space"

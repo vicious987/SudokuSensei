@@ -3,7 +3,7 @@ SudokuSensei is a playable sudoku puzzle and backtracking visualisation tool.
 
 It generates a sudoku board that You can solve. It can also solve itself, visualising each step along the way.
 
-    SOLVER GIF
+![input gif](https://imgur.com/kzOCrHY)
 
 # How do I install it?
 ## Dependencies
@@ -61,8 +61,7 @@ Or
 * **r** to restart
 * **esc** to quit
 
-        USEAGE_GIF
-
+![Solver gif](https://imgur.com/kzOCrHY)
 # How do I configure it?
 Sudoku board is customizable with config.py script.
 
